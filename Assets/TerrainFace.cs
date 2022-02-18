@@ -5,14 +5,16 @@ using System;
 
 public class TerrainFace
 {
+    ShapeGenerator shapeGenerator;
     Mesh mesh;
     int resolution;
     Vector3 localUp;
     Vector3 axisA;
     Vector3 axisB;
 
-    public TerrainFace(Mesh mesh, int resolution, Vector3 localUp)
+    public TerrainFace(ShapeGenerator shapeGenerator, Mesh mesh, int resolution, Vector3 localUp)
     {
+        this.shapeGenerator = shapeGenerator;
         this.mesh = mesh;
         this.resolution = resolution;
         this.localUp = localUp;
@@ -32,22 +34,6 @@ public class TerrainFace
         return new Vector3(x,y,z);
     }
 
-    public static Vector2 PointToCoordinate(Vector3 pointOnUnitSphere)
-    {
-        float latitude = (float)Math.Asin(pointOnUnitSphere.y);
-        float longitude = (float)Math.Atan2(pointOnUnitSphere.x, -pointOnUnitSphere.z);
-        return new Vector2(latitude, longitude);
-    }
-
-    public static Vector3 CoordinateToPoint(Vector2 coordinate)
-    {
-        float y = (float)Math.Sin(coordinate.x);
-        float r = (float)Math.Cos(coordinate.x);
-        float x = (float)Math.Sin(coordinate.y) * r;
-        float z = -(float)Math.Cos(coordinate.y) * r;
-        return new Vector3(x, y, z);
-    }
-
     public void ConstructMesh()
     {
         Vector3[] vertices = new Vector3[resolution*resolution];
@@ -62,7 +48,7 @@ public class TerrainFace
                 Vector2 percent = new Vector2(x , y) / (resolution - 1);
                 Vector3 pointOnUnitCube = localUp + (percent.x-.5f) * 2 * axisA + (percent.y-.5f) * 2 * axisB;
                 Vector3 pointOnUnitSphere = pointOnUnitCube.normalized;
-                vertices[i] = pointOnUnitSphere;
+                vertices[i] = shapeGenerator.CalculatePointOnPlanet(pointOnUnitSphere);
                 // vertices[i] = pointOnUnitSphere(pointOnUnitCube);
 
                 if (x != resolution - 1 && y != resolution - 1)

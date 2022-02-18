@@ -7,18 +7,26 @@ public class Planet : MonoBehaviour
     [Range(2,256)]
     public int resolution = 10;
 
+    public ShapeSettings ShapeSettings;
+
+    [HideInInspector]
+    public bool shapeSettingsFoldout;
+
+    ShapeGenerator shapeGenerator;
+
     [SerializeField, HideInInspector]
     MeshFilter[] meshFilters;
     TerrainFace[] terrainFaces;
 
     private void OnValidate()
     {
-        Initialize();
-        GenerateMesh();
+        OnShapeSettingsUpdate();
     }
 
     void Initialize()
     {
+        shapeGenerator = new ShapeGenerator(ShapeSettings);
+
         if (meshFilters == null || meshFilters.Length == 0)
         {
             meshFilters = new MeshFilter[6];
@@ -40,8 +48,14 @@ public class Planet : MonoBehaviour
 
             }
             
-            terrainFaces[i] = new TerrainFace(meshFilters[i].sharedMesh, resolution, directions[i]);
+            terrainFaces[i] = new TerrainFace(shapeGenerator, meshFilters[i].sharedMesh, resolution, directions[i]);
         }
+    }
+
+    public void OnShapeSettingsUpdate()
+    {
+        Initialize();
+        GenerateMesh();
     }
 
     void GenerateMesh()
